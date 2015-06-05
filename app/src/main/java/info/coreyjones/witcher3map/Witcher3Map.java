@@ -19,25 +19,13 @@ public class Witcher3Map extends ActionBarActivity {
     public boolean fullScreen = false;
     public final String siteURL = "http://witcher3map.com";
 
+
+    //Overrides for activity creation and event handlers
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_witcher3_map);
         WebView theMapView = setupWebView(siteURL, R.id.mapView);
-    }
-
-    protected WebView setupWebView(String theURL,int TheViewID) {
-        WebView theWebView = (WebView) findViewById(TheViewID);
-        theWebView.setWebViewClient(new WebViewClient());
-
-        WebSettings webSettings = theWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setSupportZoom(true);
-
-        theWebView.loadUrl(theURL);
-        return theWebView;
     }
 
     @Override
@@ -49,12 +37,9 @@ public class Witcher3Map extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handling action bar item clicks here.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             initSettingsMenu();
         } else if (id == R.id.action_immersive) {
@@ -66,12 +51,8 @@ public class Witcher3Map extends ActionBarActivity {
                 toastMessage("Full Screen mode: ON!");
                 fullScreen = !fullScreen;
             }
-        }
-        else if(id == R.id.refresh_window){
-            WebView theWebView = (WebView) findViewById(R.id.mapView);
-            String webUrl = theWebView.getUrl();
-            theWebView.loadUrl(webUrl);
-            toastMessage("Refreshing Page...");
+        } else if (id == R.id.refresh_window) {
+            refreshPage(R.id.mapView);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -89,19 +70,47 @@ public class Witcher3Map extends ActionBarActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    public void initSettingsMenu(){
-        Intent intent = new Intent(this,SettingsMenu.class);
+    //Custom Functions
+
+    //WebView Creator
+    protected WebView setupWebView(String theURL, int TheViewID) {
+        WebView theWebView = (WebView) findViewById(TheViewID);
+        theWebView.setWebViewClient(new WebViewClient());
+
+        WebSettings webSettings = theWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setSupportZoom(true);
+
+        theWebView.loadUrl(theURL);
+        return theWebView;
+    }
+
+    //Refresh WebView - Pass in R.id.controlID
+    protected void refreshPage(int TheID){
+        WebView theWebView = (WebView) findViewById(TheID);
+        String currentURL = theWebView.getUrl();
+        theWebView.loadUrl(currentURL);
+        toastMessage("Refreshing Page...");
+    }
+
+    //Settings Menu Initialization
+    protected void initSettingsMenu() {
+        Intent intent = new Intent(this, SettingsMenu.class);
         startActivity(intent);
     }
 
-    public void toastMessage(CharSequence text){
+    //Toast Message Wrapper for easier use.
+    protected void toastMessage(CharSequence text) {
         Context context = getApplicationContext();
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
     }
 
-    public void toggleHideyBar() {
+    //Immersion Mode Function from Google
+    protected void toggleHideyBar() {
 
         int uiOptions = this.getWindow().getDecorView().getSystemUiVisibility();
         int newUiOptions = uiOptions;
