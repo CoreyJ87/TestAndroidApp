@@ -12,7 +12,6 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -24,21 +23,21 @@ public class Witcher3Map extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_witcher3_map);
-        createMapView();
+        WebView theMapView = setupWebView(siteURL, R.id.mapView);
     }
 
-    protected WebView createMapView() {
-        WebView mapView = (WebView) findViewById(R.id.mapView);
-        mapView.setWebViewClient(new WebViewClient());
+    protected WebView setupWebView(String theURL,int TheViewID) {
+        WebView theWebView = (WebView) findViewById(TheViewID);
+        theWebView.setWebViewClient(new WebViewClient());
 
-        WebSettings webSettings = mapView.getSettings();
+        WebSettings webSettings = theWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setSupportZoom(true);
 
-        mapView.loadUrl(siteURL);
-        return mapView;
+        theWebView.loadUrl(theURL);
+        return theWebView;
     }
 
     @Override
@@ -57,22 +56,22 @@ public class Witcher3Map extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            initSettingsMenu();
         } else if (id == R.id.action_immersive) {
-            Context context = getApplicationContext();
-            int duration = Toast.LENGTH_SHORT;
             toggleHideyBar();
             if (fullScreen) {
-                CharSequence text = "Full Screen mode: OFF!";
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                toastMessage("Full Screen mode: OFF!");
                 fullScreen = !fullScreen;
             } else {
-                CharSequence text = "Full Screen mode: ON!";
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                toastMessage("Full Screen mode: ON!");
                 fullScreen = !fullScreen;
             }
+        }
+        else if(id == R.id.refresh_window){
+            WebView theWebView = (WebView) findViewById(R.id.mapView);
+            String webUrl = theWebView.getUrl();
+            theWebView.loadUrl(webUrl);
+            toastMessage("Refreshing Page...");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -88,6 +87,18 @@ public class Witcher3Map extends ActionBarActivity {
         // If it wasn't the Back key or there's no web page history, bubble up to the default
         // system behavior (probably exit the activity)
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void initSettingsMenu(){
+        Intent intent = new Intent(this,SettingsMenu.class);
+        startActivity(intent);
+    }
+
+    public void toastMessage(CharSequence text){
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     public void toggleHideyBar() {
