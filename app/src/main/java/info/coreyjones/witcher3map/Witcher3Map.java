@@ -12,20 +12,22 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.Toast;
 
 
 public class Witcher3Map extends ActionBarActivity {
-    public boolean fullScreen = false;
-    public final String siteURL = "http://witcher3map.com";
-
+    protected boolean fullScreen = false;
+    protected final String siteURL = "http://witcher3map.com";
+    protected WebView theMapView;
+    protected boolean actionBarState = true;
 
     //Overrides for activity creation and event handlers
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_witcher3_map);
-        WebView theMapView = setupWebView(siteURL, R.id.mapView);
+        theMapView = setupWebView(siteURL, R.id.mapView, savedInstanceState);
     }
 
     @Override
@@ -45,16 +47,46 @@ public class Witcher3Map extends ActionBarActivity {
         } else if (id == R.id.action_immersive) {
             toggleHideyBar();
             if (fullScreen) {
-                toastMessage("Full Screen mode: OFF!");
+                toastMessage(getString(R.string.fullScreenOff));
+                showActionBar();
                 fullScreen = !fullScreen;
             } else {
-                toastMessage("Full Screen mode: ON!");
+                toastMessage(getString(R.string.fullScreenOn));
+                hideActionBar();
                 fullScreen = !fullScreen;
             }
         } else if (id == R.id.refresh_window) {
             refreshPage(R.id.mapView);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save the state of the WebView
+        theMapView.saveState(outState);
+
+        /*
+        Not used now but if I need to save the state of multiple webviews this is the code. Save the state into a new bundle
+        Then use putBundle to save the new bundle into the outState bundle. Then use .getBundle to retrieve them by key.
+
+        http://stackoverflow.com/questions/4172800/android-muliple-webview-save-instance
+        http://stackoverflow.com/questions/18479519/how-to-save-restore-webview-state
+
+        Bundle webViewBundle = new Bundle();
+        theMapView.saveState(webViewBundle);
+        webViewBundle.putBundle("TheMapView1",outState);
+        */
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Restore the state of the WebView
+        theMapView.restoreState(savedInstanceState);
     }
 
     @Override
@@ -73,7 +105,7 @@ public class Witcher3Map extends ActionBarActivity {
     //Custom Functions
 
     //WebView Creator
-    protected WebView setupWebView(String theURL, int TheViewID) {
+    protected WebView setupWebView(String theURL, int TheViewID, Bundle savedInstanceState) {
         WebView theWebView = (WebView) findViewById(TheViewID);
         theWebView.setWebViewClient(new WebViewClient());
 
@@ -82,17 +114,48 @@ public class Witcher3Map extends ActionBarActivity {
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setSupportZoom(true);
+        if (savedInstanceState == null) {
+            // Load a page
+            theWebView.loadUrl(theURL);
+        }
 
-        theWebView.loadUrl(theURL);
         return theWebView;
     }
 
+    //Hide Action Bar
+    public void toggleActionBar(View view) {
+        if (getSupportActionBar() != null && actionBarState) {
+            hideActionBar();
+        } else if (getSupportActionBar() != null && actionBarState == false) {
+            showActionBar();
+        }
+
+    }
+
+    public void hideActionBar() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+            actionBarState = !actionBarState;
+            Button hideButton = (Button) findViewById(R.id.hideBar);
+            hideButton.setText(getString(R.string.showBar));
+        }
+    }
+
+    public void showActionBar() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().show();
+            actionBarState = !actionBarState;
+            Button hideButton = (Button) findViewById(R.id.hideBar);
+            hideButton.setText(getString(R.string.hideBar));
+        }
+    }
+
     //Refresh WebView - Pass in R.id.controlID
-    protected void refreshPage(int TheID){
+    protected void refreshPage(int TheID) {
         WebView theWebView = (WebView) findViewById(TheID);
         String currentURL = theWebView.getUrl();
         theWebView.loadUrl(currentURL);
-        toastMessage("Refreshing Page...");
+        toastMessage(getString(R.string.refreshString));
     }
 
     //Settings Menu Initialization
@@ -134,6 +197,4 @@ public class Witcher3Map extends ActionBarActivity {
         this.getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
         //END_INCLUDE (set_ui_flags)
     }
-
-
 }

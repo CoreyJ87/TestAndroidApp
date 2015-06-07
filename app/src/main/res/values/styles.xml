@@ -1,19 +1,46 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ThemeActionBar</item>
-        <item name="android:windowActionBarOverlay">true</item>
+    <style name="AppTheme" parent="Base.Theme.AppCompat"></style>
+
+    <style name="CustomActionBarTheme"
+        parent="@style/Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:textColor">@color/white</item> <!--OverFlow Menu Text Color-->
+        <item name="android:dropDownListViewStyle">@style/PopupMenuListView</item>
+
         <!-- Support library compatibility -->
-        <item name="actionBarStyle">@style/ThemeActionBar</item>
-        <item name="windowActionBarOverlay">true</item>
+        <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="dropDownListViewStyle">@style/PopupMenuListView</item>
+        <item name="actionBarDivider">@null</item>
     </style>
-    <style name="ThemeActionBar"
-        parent="Widget.AppCompat.Light.ActionBar.Solid">
-        <item name="android:background">#30000000</item>
+
+    <!-- ActionBar styles -->
+    <style name="MyActionBar"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/dark_red</item>
+        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+
         <!-- Support library compatibility -->
-        <item name="background">@color/white</item>
+        <item name="background">@color/dark_red</item>
+        <item name="titleTextStyle">@style/MyActionBarTitleText</item>
     </style>
+
+    <!-- ActionBar title text -->
+    <style name="MyActionBarTitleText"
+        parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <!-- OverFlow menu Styles -->
+    <style name="PopupMenuListView" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
+        <item name="android:divider">@color/white</item>
+        <item name="android:dividerHeight">2dp</item>
+        <item name="android:background">@color/dark_red</item>
+    </style>
+
+
+
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
