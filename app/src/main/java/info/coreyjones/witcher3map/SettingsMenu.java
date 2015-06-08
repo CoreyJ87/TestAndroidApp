@@ -1,12 +1,17 @@
 package info.coreyjones.witcher3map;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class SettingsMenu extends ActionBarActivity {
@@ -18,6 +23,14 @@ public class SettingsMenu extends ActionBarActivity {
         TextView myTextView = (TextView)findViewById(R.id.settings_text);
         myTextView.setText(Html.fromHtml(getString(R.string.settings_info)));
         myTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String defaultValue = getResources().getString(R.string.edit_message_default);
+        String theRestoredMessage = sharedPref.getString("the_message", defaultValue);
+        if(theRestoredMessage != defaultValue){
+            toastMessage("Text Field data restored successfully!");
+        }
+        EditText editTextField = (EditText) findViewById(R.id.editText);
+        editTextField.setText(theRestoredMessage);
     }
 
     @Override
@@ -41,4 +54,24 @@ public class SettingsMenu extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    public void saveText(View view){
+        EditText editText = (EditText) findViewById(R.id.editText);
+        String message = editText.getText().toString();
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("the_message", message);
+        editor.commit();
+        toastMessage("Text Saved!");
+    }
+
+    //Toast Message Wrapper for easier use.
+    protected void toastMessage(CharSequence text) {
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
+
 }
