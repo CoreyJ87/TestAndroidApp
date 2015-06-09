@@ -18,10 +18,11 @@
         android:layout_marginTop="90dp"
         android:hint="@string/edit_message"
         android:inputType="text"
-        android:enabled="false"
+        android:enabled="true"
         android:layout_below="@+id/settings_text"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:editable="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -70,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
+        android:text="@string/defaultTVText"
         android:id="@+id/fileOutput"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -78,7 +79,18 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:background="#FFF"
-        android:layout_below="@+id/checkBox" />
+        android:textColor="#000"
+        android:layout_below="@+id/textViewLabel" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/fileTextLabel"
+        android:id="@+id/textViewLabel"
+        android:layout_below="@+id/checkBox"
+        android:layout_centerHorizontal="true"
+        android:focusableInTouchMode="false" />
 
 
 </RelativeLayout>

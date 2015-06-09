@@ -20,16 +20,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 
 public class SettingsMenu extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
 
     protected boolean wearableState = false;
     protected boolean fileState = false;
+    static final int READ_BLOCK_SIZE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,9 +108,8 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         if (wearableState) {
             sendWearableNoti(getString(R.string.text_saved), message);
         }
-        if(fileState){
-            toastMessage("File State true");
-            saveToFile(message,"textToSave.txt");
+        if (fileState) {
+            saveToFile(message, "textToSave.txt");
             readFile("textToSave.txt");
         }
 
@@ -118,9 +124,7 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
 
     //Toast Message Wrapper for easier use.
     protected void toastMessage(CharSequence text) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
+        Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -150,35 +154,44 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         notificationManager.notify(notificationId, notificationBuilder.build());
     }
 
-    protected void saveToFile(String textToSave,String filename){
-        FileOutputStream outputStream;
+    protected void saveToFile(String textToSave, String filename) {
         try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(textToSave.getBytes());
-            outputStream.close();
+            FileOutputStream fileout = openFileOutput(filename, MODE_PRIVATE);
+            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+            outputWriter.write(textToSave);
+            outputWriter.close();
+
+            //display file saved message
+            Toast.makeText(getBaseContext(), getString(R.string.fileSaved),
+                    Toast.LENGTH_SHORT).show();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    protected void readFile(String filename){
-        StringBuilder text = new StringBuilder();
+    protected void readFile(String filename) {
         try {
-            File sdcard = getFilesDir();
-            File file = new File(sdcard,filename);
+            FileInputStream fileIn = openFileInput(filename);
+            InputStreamReader InputRead = new InputStreamReader(fileIn);
 
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
+            char[] inputBuffer = new char[READ_BLOCK_SIZE];
+            String s = "";
+            int charRead;
+
+            while ((charRead = InputRead.read(inputBuffer)) > 0) {
+                // char to string conversion
+                String readstring = String.copyValueOf(inputBuffer, 0, charRead);
+                s += readstring;
             }
-            br.close() ;
-        }catch (IOException e) {
+            InputRead.close();
+            TextView tv = (TextView) findViewById(R.id.fileOutput);
+            tv.setText(s); ////Set the text to text view.
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        TextView tv = (TextView)findViewById(R.id.fileOutput);
-        tv.setText(text.toString()); ////Set the text to text view.
+
     }
 }

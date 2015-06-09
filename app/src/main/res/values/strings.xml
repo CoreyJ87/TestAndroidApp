@@ -8,6 +8,9 @@
     <string name="edit_message">Enter a message</string>
     <string name="edit_message_default">Enter a message</string>
     <string name="saveFile">Save to File</string>
+    <string name="fileTextLabel">Text From File</string>
+    <string name="defaultTVText">Text From File</string>
+    <string name="fileSaved">File saved successfully!</string>
 
     <!--Witcher Page settings menu-->
     <string name="refresh_window">Refresh</string>
