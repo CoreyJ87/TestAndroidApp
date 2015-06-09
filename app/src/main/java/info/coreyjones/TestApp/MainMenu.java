@@ -1,4 +1,4 @@
-package info.coreyjones.witcher3map;
+package info.coreyjones.TestApp;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 
-public class Witcher3Map extends ActionBarActivity {
+public class MainMenu extends ActionBarActivity {
     protected boolean fullScreen = false;
     protected final String siteURL = "http://witcher3map.com";
     protected WebView theMapView;
@@ -26,14 +26,14 @@ public class Witcher3Map extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_witcher3_map);
+        setContentView(R.layout.activity_main_menu);
         theMapView = setupWebView(siteURL, R.id.mapView, savedInstanceState);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_witcher3_map, menu);
+        getMenuInflater().inflate(R.menu.menu_main_menu, menu);
         return true;
     }
 

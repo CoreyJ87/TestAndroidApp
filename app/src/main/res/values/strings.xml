@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Title Texts-->
-    <string name="app_name">Witcher 3 Map</string>
+    <string name="app_name">Test App Main Menu</string>
     <string name="title_activity_settings_menu">Settings</string>
 
     <!--Test message on settings activity -->

@@ -5,7 +5,7 @@ android {
     buildToolsVersion '22.0.1'
 
     defaultConfig {
-        applicationId "info.coreyjones.witcher3map"
+        applicationId "info.coreyjones.TestApp"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1

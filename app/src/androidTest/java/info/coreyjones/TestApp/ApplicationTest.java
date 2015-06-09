@@ -1,4 +1,4 @@
-package info.coreyjones.witcher3map;
+package info.coreyjones.TestApp;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
