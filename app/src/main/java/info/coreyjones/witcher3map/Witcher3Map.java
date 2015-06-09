@@ -1,6 +1,5 @@
 package info.coreyjones.witcher3map;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -15,9 +14,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.NotificationCompat.WearableExtender;
 
 
 public class Witcher3Map extends ActionBarActivity {
@@ -32,7 +28,6 @@ public class Witcher3Map extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_witcher3_map);
         theMapView = setupWebView(siteURL, R.id.mapView, savedInstanceState);
-        sendWearableNoti();
     }
 
     @Override
@@ -108,32 +103,6 @@ public class Witcher3Map extends ActionBarActivity {
     }
 
     //Custom Functions
-
-
-    protected void sendWearableNoti(){
-        int notificationId = 001;
-// Build intent for notification content
-        Intent viewIntent = new Intent(this, SettingsMenu.class);
-        String EXTRA_EVENT_ID = "1";
-        String eventId = "1";
-        viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-        PendingIntent viewPendingIntent =
-                PendingIntent.getActivity(this, 0, viewIntent, 0);
-
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_event_black_12dp)
-                        .setContentTitle("This is a test")
-                        .setContentText("hiiiiiii")
-                        .setContentIntent(viewPendingIntent);
-
-// Get an instance of the NotificationManager service
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(this);
-
-// Build the notification and issues it with notification manager.
-        notificationManager.notify(notificationId, notificationBuilder.build());
-    }
 
     //WebView Creator
     protected WebView setupWebView(String theURL, int TheViewID, Bundle savedInstanceState) {
