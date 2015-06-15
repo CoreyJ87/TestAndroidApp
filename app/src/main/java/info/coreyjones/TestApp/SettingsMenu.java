@@ -7,10 +7,10 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
@@ -32,8 +32,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.text.DateFormat;
 import java.util.Date;
+import java.text.DateFormat;
 
 
 public class SettingsMenu extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -42,9 +42,8 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
     protected boolean fileState = false;
     static final int READ_BLOCK_SIZE = 100;
     protected GoogleApiClient mGoogleApiClient;
-    private Location mCurrentLocation;
-    private AddressResultReceiver mResultReceiver;
-    private String mLastUpdateTime;
+    protected Location mCurrentLocation;
+    protected String mLastUpdateTime;
     boolean mRequestingLocationUpdates = true;
 
     @Override
@@ -302,26 +301,21 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
 
 
     protected void startIntentService() {
-        mResultReceiver = new AddressResultReceiver(null);
-        Intent intent = new Intent(this, FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mCurrentLocation);
-        startService(intent);
+        AddressResultReceiver mResultReceiver = new AddressResultReceiver(null);
+        Intent FetchAddressIntent = new Intent(this, FetchAddressIntentService.class);
+        FetchAddressIntent.putExtra(Constants.RECEIVER, mResultReceiver);
+        FetchAddressIntent.putExtra(Constants.LOCATION_DATA_EXTRA, mCurrentLocation);
+        startService(FetchAddressIntent);
     }
 
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver(Handler handler) {
             super(handler);
         }
-
         public String mAddressOutput;
-
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-            // Display the address string
-            // or an error message sent from the intent service.
             mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -331,7 +325,6 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
                 }
             });
         }
-
     }
 
     private void updateUI() {
