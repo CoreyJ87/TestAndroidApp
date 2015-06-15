@@ -33,4 +33,15 @@
 
     <!--Text for settings page-->
     <string name="settings_info"><![CDATA[This is the settings menu. Checking if <a href="http://google.com">Links work?</a>]]></string>
+    <string name="longitude_default_text">Longitude</string>
+    <string name="lat_default_text">Latitude : </string>
+    <string name="geolocation_addr_default">Geolocation Address</string>
+    <string name="conn_status_label">Connection Status:</string>
+    <string name="the_connect_status_default_text">The Status</string>
+    <string name="update_time_default_text">Update Time</string>
+    <string name="update_time_label_text">Update Time:</string>
+    <string name="toggle_button_text">Toggle GPS Update</string>
+    <string name="gps_constant_label_text">GPS Constant</string>
+    <string name="lat_long_label_text">Latitude/Longitude</string>
+    <string name="location_data_label_text">Location Data</string>
 </resources>

@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -41,7 +42,6 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
     protected boolean fileState = false;
     static final int READ_BLOCK_SIZE = 100;
     protected GoogleApiClient mGoogleApiClient;
-    protected Location mLastLocation;
     private Location mCurrentLocation;
     private AddressResultReceiver mResultReceiver;
     private String mLastUpdateTime;
@@ -57,29 +57,8 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         myTextView.setText(Html.fromHtml(getString(R.string.settings_info)));
         myTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //Restore edit text field
-        String defaultValue = getString(R.string.edit_message_default);
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        String theRestoredMessage = sharedPref.getString("the_message", defaultValue);
-        if (theRestoredMessage != defaultValue) {
-            toastMessage(getString(R.string.textRestored));
-        }
-        EditText editTextField = (EditText) findViewById(R.id.messageText);
-        editTextField.setText(theRestoredMessage);
-
-        //Setup wearable switch
-        Switch wearSwitch = (Switch) findViewById(R.id.sendWearable);
-        wearableState = sharedPref.getBoolean("switch_state", false);
-        wearSwitch.setChecked(wearableState);
-        wearSwitch.setOnCheckedChangeListener(this);
-
-        final CheckBox theCheckBox = (CheckBox) findViewById(R.id.checkBox);
-        theCheckBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fileState = theCheckBox.isChecked();
-            }
-        });
+        restoreText();
+        setupOnClickListeners();
         buildGoogleApiClient();
     }
 
@@ -201,6 +180,43 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
 
     }
 
+    protected void setupOnClickListeners() {
+        final CheckBox theCheckBox = (CheckBox) findViewById(R.id.checkBox);
+        theCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fileState = theCheckBox.isChecked();
+            }
+        });
+
+        final ToggleButton gpsState = (ToggleButton) findViewById(R.id.toggleGPS);
+        gpsState.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                mRequestingLocationUpdates = gpsState.isChecked();
+            }
+        });
+    }
+
+    protected void restoreText() {
+        //Restore edit text field
+        String defaultValue = getString(R.string.edit_message_default);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String theRestoredMessage = sharedPref.getString("the_message", defaultValue);
+        if (theRestoredMessage != defaultValue) {
+            toastMessage(getString(R.string.textRestored));
+        }
+        EditText editTextField = (EditText) findViewById(R.id.messageText);
+        editTextField.setText(theRestoredMessage);
+        readFile("textToSave.txt");
+
+        //Setup wearable switch
+        Switch wearSwitch = (Switch) findViewById(R.id.sendWearable);
+        wearableState = sharedPref.getBoolean("switch_state", false);
+        wearSwitch.setChecked(wearableState);
+        wearSwitch.setOnCheckedChangeListener(this);
+    }
 
     protected synchronized void buildGoogleApiClient() {
 
@@ -220,22 +236,10 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         return mLocationRequest;
     }
 
-    protected void startLocationUpdates(LocationRequest mLocationRequest) {
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
-    }
-
-    protected void stopLocationUpdates() {
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(
-                    mGoogleApiClient, this);
-        }
     }
 
     @Override
@@ -245,6 +249,26 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
             LocationRequest mLocationRequest = createLocationRequest();
             startLocationUpdates(mLocationRequest);
         }
+    }
+
+
+    protected void stopLocationUpdates() {
+        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient, this);
+        }
+    }
+
+    protected void startLocationUpdates(LocationRequest mLocationRequest) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mCurrentLocation = location;
+        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        updateUI();
     }
 
     @Override
@@ -257,17 +281,9 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         if (mRequestingLocationUpdates) {
             startLocationUpdates(mLocationRequest);
         }
-
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if (mLastLocation != null) {
-            TextView latitude = (TextView) findViewById(R.id.lat);
-            latitude.setText(String.valueOf(mLastLocation.getLatitude()));
-
-            TextView longitude = (TextView) findViewById(R.id.lon);
-            longitude.setText(String.valueOf(mLastLocation.getLongitude()));
-
-            startIntentService();
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mCurrentLocation != null) {
+            updateUI();
         }
 
     }
@@ -289,25 +305,8 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         mResultReceiver = new AddressResultReceiver(null);
         Intent intent = new Intent(this, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mCurrentLocation);
         startService(intent);
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mCurrentLocation = mLastLocation = location;
-        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        updateUI();
-    }
-
-    private void updateUI() {
-        TextView longitude = (TextView) findViewById(R.id.lon);
-        TextView latitude = (TextView) findViewById(R.id.lat);
-        latitude.setText(String.valueOf(mCurrentLocation.getLatitude()));
-        longitude.setText(String.valueOf(mCurrentLocation.getLongitude()));
-        TextView mLastUpdateTimeTextView = (TextView) findViewById(R.id.updateTime);
-        mLastUpdateTimeTextView.setText(mLastUpdateTime);
-        startIntentService();
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -328,10 +327,20 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
                 public void run() {
                     TextView addr = (TextView) findViewById(R.id.geoaddress);
                     addr.setText(mAddressOutput);
-                    sendWearableNoti("Your Location", mAddressOutput);
+                    //sendWearableNoti("Your Location", mAddressOutput);
                 }
             });
         }
 
+    }
+
+    private void updateUI() {
+        TextView longitude = (TextView) findViewById(R.id.lon);
+        TextView latitude = (TextView) findViewById(R.id.lat);
+        latitude.setText(String.valueOf(mCurrentLocation.getLatitude() + " : "));
+        longitude.setText(String.valueOf(mCurrentLocation.getLongitude()));
+        TextView mLastUpdateTimeTextView = (TextView) findViewById(R.id.updateTime);
+        mLastUpdateTimeTextView.setText(mLastUpdateTime);
+        startIntentService();
     }
 }
