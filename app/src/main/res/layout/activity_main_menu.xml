@@ -15,6 +15,5 @@
         android:layout_height="50dp"
         android:text="@string/hideBar"
         android:id="@+id/hideBar"
-        android:layout_alignParentEnd="true"
         android:onClick="toggleActionBar"/>
 </RelativeLayout>

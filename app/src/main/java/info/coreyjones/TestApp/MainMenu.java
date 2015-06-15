@@ -1,6 +1,5 @@
 package info.coreyjones.TestApp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -14,7 +13,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
-
 
 public class MainMenu extends ActionBarActivity {
     protected boolean fullScreen = false;
@@ -166,9 +164,7 @@ public class MainMenu extends ActionBarActivity {
 
     //Toast Message Wrapper for easier use.
     protected void toastMessage(CharSequence text) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
     }
 

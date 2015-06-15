@@ -92,5 +92,65 @@
         android:layout_centerHorizontal="true"
         android:focusableInTouchMode="false" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Longitude"
+        android:id="@+id/lon"
+        android:layout_below="@+id/settings_text"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Latitude"
+        android:id="@+id/lat"
+        android:layout_below="@+id/lon"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Geolocation Address"
+        android:id="@+id/geoaddress"
+        android:layout_below="@+id/lat"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Connection Status:"
+        android:id="@+id/textView"
+        android:layout_below="@+id/geoaddress"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="The Status"
+        android:id="@+id/connectStatus"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Update Time"
+        android:id="@+id/updateTime"
+        android:layout_below="@+id/lat"
+        android:layout_toRightOf="@+id/geoaddress"
+        android:layout_toEndOf="@+id/geoaddress"
+        android:paddingLeft="10dp" />
 
 </RelativeLayout>

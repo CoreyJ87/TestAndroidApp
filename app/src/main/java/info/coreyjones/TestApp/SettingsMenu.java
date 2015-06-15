@@ -4,6 +4,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -18,17 +21,31 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.util.Date;
 
 
-public class SettingsMenu extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
+public class SettingsMenu extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     protected boolean wearableState = false;
     protected boolean fileState = false;
     static final int READ_BLOCK_SIZE = 100;
+    protected GoogleApiClient mGoogleApiClient;
+    protected Location mLastLocation;
+    private Location mCurrentLocation;
+    private AddressResultReceiver mResultReceiver;
+    private String mLastUpdateTime;
+    boolean mRequestingLocationUpdates = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +80,7 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
                 fileState = theCheckBox.isChecked();
             }
         });
-
+        buildGoogleApiClient();
     }
 
     @Override
@@ -112,9 +129,6 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         editText.setText(getString(R.string.edit_message_default));
     }
 
-    /* Protected functions */
-
-    //Toast Message Wrapper for easier use.
     protected void toastMessage(CharSequence text) {
         Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
         toast.show();
@@ -184,6 +198,140 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
             e.printStackTrace();
         }
 
+
+    }
+
+
+    protected synchronized void buildGoogleApiClient() {
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    protected LocationRequest createLocationRequest() {
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return mLocationRequest;
+    }
+
+    protected void startLocationUpdates(LocationRequest mLocationRequest) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    protected void stopLocationUpdates() {
+        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient, this);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
+            LocationRequest mLocationRequest = createLocationRequest();
+            startLocationUpdates(mLocationRequest);
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        TextView connectionStatus = (TextView) findViewById(R.id.connectStatus);
+        connectionStatus.setText("Connected");
+
+        LocationRequest mLocationRequest = createLocationRequest();
+
+        if (mRequestingLocationUpdates) {
+            startLocationUpdates(mLocationRequest);
+        }
+
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        if (mLastLocation != null) {
+            TextView latitude = (TextView) findViewById(R.id.lat);
+            latitude.setText(String.valueOf(mLastLocation.getLatitude()));
+
+            TextView longitude = (TextView) findViewById(R.id.lon);
+            longitude.setText(String.valueOf(mLastLocation.getLongitude()));
+
+            startIntentService();
+        }
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        TextView connectStatus = (TextView) findViewById(R.id.connectStatus);
+        connectStatus.setText("Suspended Connection");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        TextView connectStatus = (TextView) findViewById(R.id.connectStatus);
+        connectStatus.setText("Connect to lat/long Failed");
+    }
+
+
+    protected void startIntentService() {
+        mResultReceiver = new AddressResultReceiver(null);
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mCurrentLocation = mLastLocation = location;
+        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        updateUI();
+    }
+
+    private void updateUI() {
+        TextView longitude = (TextView) findViewById(R.id.lon);
+        TextView latitude = (TextView) findViewById(R.id.lat);
+        latitude.setText(String.valueOf(mCurrentLocation.getLatitude()));
+        longitude.setText(String.valueOf(mCurrentLocation.getLongitude()));
+        TextView mLastUpdateTimeTextView = (TextView) findViewById(R.id.updateTime);
+        mLastUpdateTimeTextView.setText(mLastUpdateTime);
+        startIntentService();
+    }
+
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        public String mAddressOutput;
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            // Display the address string
+            // or an error message sent from the intent service.
+            mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TextView addr = (TextView) findViewById(R.id.geoaddress);
+                    addr.setText(mAddressOutput);
+                    sendWearableNoti("Your Location", mAddressOutput);
+                }
+            });
+        }
 
     }
 }
