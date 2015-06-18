@@ -16,34 +16,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapView extends FragmentActivity implements OnMapReadyCallback {
     private MapFragment mapFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_view);
         mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
-
-        zoomToLocation();
-    }
-
-    private void zoomToLocation() {
-        final GoogleMap theMap = mapFragment.getMap();
         mapFragment.getMapAsync(this);
-        Intent intent = getIntent();
-        final Double longitude = intent.getDoubleExtra("Longitude", 0);
-        final Double latitude = intent.getDoubleExtra("Latitude", 0);
-        theMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                LatLng CurrentView = new LatLng(latitude, longitude);
-                // Move the camera instantly to Sydney with a zoom of 15.
-                theMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentView, 15));
-
-                // Zoom in, animating the camera.
-                theMap.animateCamera(CameraUpdateFactory.zoomIn());
-            }
-        });
-    }
+        }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,13 +49,24 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback {
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
 
-        Intent intent = getIntent();
-        Double longitude = intent.getDoubleExtra("Longitude", 0);
-        Double latitude = intent.getDoubleExtra("Latitude", 0);
+        final Intent intent = getIntent();
+        final double longitude = intent.getDoubleExtra("Longitude", 0);
+        final double latitude = intent.getDoubleExtra("Latitude", 0);
         googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(latitude,longitude))
+                .position(new LatLng(latitude, longitude))
                 .title("My Location"));
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                LatLng CurrentView = new LatLng(latitude, longitude);
+                // Move the camera instantly to Sydney with a zoom of 15.
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentView, 15));
+
+                // Zoom in, animating the camera.
+                googleMap.animateCamera(CameraUpdateFactory.zoomIn());
+            }
+        });
     }
 }
