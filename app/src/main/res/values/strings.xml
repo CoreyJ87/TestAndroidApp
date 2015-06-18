@@ -44,4 +44,8 @@
     <string name="gps_constant_label_text">GPS Constant</string>
     <string name="lat_long_label_text">Latitude/Longitude</string>
     <string name="location_data_label_text">Location Data</string>
+    <string name="title_activity_map_view">Map View</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="MapItText">MapIt</string>
 </resources>

@@ -308,6 +308,13 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         startService(FetchAddressIntent);
     }
 
+    public void mapIt(View view){
+        Intent MapView = new Intent(this, MapView.class);
+        MapView.putExtra("Latitude",mCurrentLocation.getLatitude());
+        MapView.putExtra("Longitude",mCurrentLocation.getLongitude());
+        startActivity(MapView);
+    }
+
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver(Handler handler) {
             super(handler);

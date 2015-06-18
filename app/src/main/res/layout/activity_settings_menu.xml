@@ -205,4 +205,16 @@
         android:layout_toRightOf="@+id/geoaddress"
         android:layout_toEndOf="@+id/geoaddress" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/MapItText"
+        android:id="@+id/button"
+        android:onClick="mapIt"
+        android:layout_above="@+id/messageText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
 </RelativeLayout>
