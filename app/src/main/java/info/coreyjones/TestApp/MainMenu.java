@@ -55,7 +55,9 @@ public class MainMenu extends ActionBarActivity {
             }
         } else if (id == R.id.refresh_window) {
             refreshPage(R.id.mapView);
-        }
+        } else if (id == R.id.action_sensors) {
+            initSensorsMenu();
+    }
         return super.onOptionsItemSelected(item);
     }
 
@@ -159,6 +161,11 @@ public class MainMenu extends ActionBarActivity {
     //Settings Menu Initialization
     protected void initSettingsMenu() {
         Intent intent = new Intent(this, SettingsMenu.class);
+        startActivity(intent);
+    }
+    //Settings Menu Initialization
+    protected void initSensorsMenu() {
+        Intent intent = new Intent(this, sensorsMenu.class);
         startActivity(intent);
     }
 

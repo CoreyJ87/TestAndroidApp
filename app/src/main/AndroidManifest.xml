@@ -8,10 +8,8 @@
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission
-        android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
@@ -50,9 +48,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="info.coreyjones.TestApp.SettingsMenu" />
         </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBqRO26SBP8R67OneqzjztYMHZ-xJTfvbw"/>
+            android:value="AIzaSyBqRO26SBP8R67OneqzjztYMHZ-xJTfvbw" />
+
+        <activity
+            android:name=".sensorsMenu"
+            android:label="@string/title_activity_sensors_menu"
+            android:parentActivityName=".MainMenu" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="info.coreyjones.TestApp.MainMenu" />
+        </activity>
     </application>
 
 </manifest>
