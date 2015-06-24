@@ -79,7 +79,7 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         }
     }
 
-    public void saveText(View view) {
+    protected void saveText(View view) {
         //Grab text from editText field
         EditText editText = (EditText) findViewById(R.id.messageText);
         String message = editText.getText().toString();
@@ -102,12 +102,31 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
 
     }
 
-    public void resetText(View view) {
+    protected void restoreText() {
+        //Restore edit text field
+        String defaultValue = getString(R.string.edit_message_default);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String theRestoredMessage = sharedPref.getString("the_message", defaultValue);
+        if (theRestoredMessage != defaultValue) {
+            toastMessage(getString(R.string.textRestored));
+        }
+        EditText editTextField = (EditText) findViewById(R.id.messageText);
+        editTextField.setText(theRestoredMessage);
+        readFile("textToSave.txt");
+
+        //Setup wearable switch
+        Switch wearSwitch = (Switch) findViewById(R.id.sendWearable);
+        wearableState = sharedPref.getBoolean("switch_state", false);
+        wearSwitch.setChecked(wearableState);
+        wearSwitch.setOnCheckedChangeListener(this);
+    }
+
+    protected void resetText(View view) {
         EditText editText = (EditText) findViewById(R.id.messageText);
         editText.setText(getString(R.string.edit_message_default));
     }
 
-    protected void toastMessage(CharSequence text) {
+    private void toastMessage(CharSequence text) {
         Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
         toast.show();
     }
@@ -196,25 +215,6 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
                 mRequestingLocationUpdates = gpsState.isChecked();
             }
         });
-    }
-
-    protected void restoreText() {
-        //Restore edit text field
-        String defaultValue = getString(R.string.edit_message_default);
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        String theRestoredMessage = sharedPref.getString("the_message", defaultValue);
-        if (theRestoredMessage != defaultValue) {
-            toastMessage(getString(R.string.textRestored));
-        }
-        EditText editTextField = (EditText) findViewById(R.id.messageText);
-        editTextField.setText(theRestoredMessage);
-        readFile("textToSave.txt");
-
-        //Setup wearable switch
-        Switch wearSwitch = (Switch) findViewById(R.id.sendWearable);
-        wearableState = sharedPref.getBoolean("switch_state", false);
-        wearSwitch.setChecked(wearableState);
-        wearSwitch.setOnCheckedChangeListener(this);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -308,7 +308,7 @@ public class SettingsMenu extends ActionBarActivity implements CompoundButton.On
         startService(FetchAddressIntent);
     }
 
-    public void mapIt(View view){
+    protected void mapIt(View view){
         Intent MapView = new Intent(this, MapView.class);
         MapView.putExtra("Latitude",mCurrentLocation.getLatitude());
         MapView.putExtra("Longitude",mCurrentLocation.getLongitude());

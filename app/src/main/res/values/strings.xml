@@ -53,4 +53,7 @@
     <!-- Text for sensors menu -->
     <string name="action_sensors">Sensors Example</string>
     <string name="title_activity_sensors_menu">Sensors Example</string>
+    <string name="dialog_cancel_text">Cancel</string>
+    <string name="response_message_default">Default Response</string>
+    <string name="default_time">Last Updated</string>
 </resources>

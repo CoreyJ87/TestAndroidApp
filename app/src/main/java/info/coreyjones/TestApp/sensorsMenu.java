@@ -1,4 +1,7 @@
 package info.coreyjones.TestApp;
+
+import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 
 
@@ -10,11 +13,17 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -26,40 +35,181 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 
 public class sensorsMenu extends ActionBarActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    protected GoogleApiClient mGoogleApiClient;
-    protected Location mCurrentLocation;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mCurrentLocation;
     private SensorManager mSensorManager;
-    private Sensor mLight, mMagnetic, mBarometer, mHumidity;
-    SensorManager smm;
-    List<Sensor> sensor;
-    ListView lv;
-    protected boolean weatherOnce = false;
+    private Sensor mLight, mMagnetic, mBarometer;
+    private String theRestoredresponse;
+    private SensorManager smm;
+    private List<Sensor> sensor;
+    private ListView lv;
+    final Context context = this;
 
+    //App Default Methods
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensors_menu);
+        setupSensors();
         buildGoogleApiClient();
+        restoreSensorText();
+        createSensorListDialog();
+    }
 
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        smm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_sensors_menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
 
-        lv = (ListView) findViewById(R.id.listView);
-        sensor = smm.getSensorList(Sensor.TYPE_ALL);
-        lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sensor));
+        return super.onOptionsItemSelected(item);
+    }
 
-        mMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        mBarometer = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
-        mHumidity = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+    public void getWeatherButton(View view) {
+        if (mCurrentLocation != null) {
+            TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
+            String updateTime = DateFormat.getTimeInstance().format(new Date());
+            lastUpdated.setText(updateTime);
+            getWeather(getCurrentFocus());
+        }
+    }
+
+    //My Methods
+    private void getWeather(final View view) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String apiKey = "a851d887d5e2d63218ba800ec5bb4";
+        double lat = getLat();
+        double longitude = getLong();
+        updateLatLng(lat,longitude);
+        String url = String.format("http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s,%s&key=%s&format=JSON", lat, longitude, apiKey);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        TextView responseText = (TextView) findViewById(R.id.responseText);
+                        responseText.setText("Response is: " + response);
+                        theRestoredresponse = response;
+                        saveSensorText(view);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                TextView responseText = (TextView) findViewById(R.id.responseText);
+                responseText.setText("That didn't work!");
+            }
+        });
+        queue.add(stringRequest);
     }
 
 
+    private double getLat() {
+        if (!mCurrentLocation.equals(null)) {
+            double lat = mCurrentLocation.getLatitude();
+            return lat;
+        }
+        else {
+            double lat = 0;
+            return lat;
+        }
+    }
+
+    private double getLong() {
+        if (!mCurrentLocation.equals(null)) {
+            double longitude = mCurrentLocation.getLongitude();
+            return longitude;
+        } else {
+            double longitude = 0;
+            return longitude;
+        }
+    }
+
+    private void updateLatLng(double lat, double longitude) {
+        TextView latitude = (TextView) findViewById(R.id.lat);
+        TextView longitudeVal = (TextView) findViewById(R.id.longitude);
+        latitude.setText(String.valueOf(lat));
+        longitudeVal.setText(String.valueOf(longitude));
+    }
+
+    private void saveSensorText(View view) {
+        //Grab text from editText field
+        TextView editText = (TextView) findViewById(R.id.responseText);
+        String message = editText.getText().toString();
+
+        //Save text to preferences
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("the_response", message);
+        editor.putString("the_time", DateFormat.getTimeInstance().format(new Date()));
+        editor.apply();
+        toastMessage(getString(R.string.text_saved));
+    }
+
+    private void restoreSensorText() {
+        String defaultResponseVal = getString(R.string.response_message_default);
+        String defaultTimeVal = getString(R.string.default_time);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        theRestoredresponse = sharedPref.getString("the_response", defaultResponseVal);
+        String theRestoredTime = sharedPref.getString("the_time", defaultTimeVal);
+        if (!theRestoredresponse.equals(defaultResponseVal)) {
+            toastMessage(getString(R.string.textRestored));
+        }
+        TextView responseText = (TextView) findViewById(R.id.responseText);
+        responseText.setText(theRestoredresponse);
+        TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
+        lastUpdated.setText(theRestoredTime);
+    }
+
+    private void createSensorListDialog() {
+        final Dialog optionDialog = new Dialog(context);
+        optionDialog.setContentView(R.layout.dialog);
+        optionDialog.setTitle("Options");
+        Button cancelButton = (Button) optionDialog.findViewById(R.id.dialogButtonCancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                optionDialog.dismiss();
+            }
+        });
+
+        Button listSensors = (Button) findViewById(R.id.listSensors);
+        listSensors.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                optionDialog.show();
+            }
+        });
+        lv = (ListView) optionDialog.findViewById(R.id.listView);
+        sensor = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sensor));
+    }
+
+    private void setupSensors() {
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        mBarometer = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+    }
+
+    private void toastMessage(CharSequence text) {
+        Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+
+    //Sensor Methods
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do something here if sensor accuracy changes.
@@ -84,58 +234,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
             TextView pressureSensor = (TextView) findViewById(R.id.barometerValue);
             String pressureString = String.format("Barometric Pressure:\n%s:hPa(millibar)", event.values[0]);
             pressureSensor.setText(pressureString);
-        } else if (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
-            TextView humiditySensor = (TextView) findViewById(R.id.humidityValue);
-            float rh = event.values[0];
-            humiditySensor.setText(String.format("Relative Humidity: %s", rh));
-            if (mCurrentLocation != null) {
-                double tempF = getTemp();
-            }
         }
-    }
-
-    protected double getTemp() {
-        double temp = 0.0;
-        RequestQueue queue = Volley.newRequestQueue(this);
-        TextView latitude = (TextView) findViewById(R.id.lat);
-        TextView longitudeVal = (TextView) findViewById(R.id.longitude);
-        double lat = mCurrentLocation.getLatitude();
-        double longitude = mCurrentLocation.getLongitude();
-
-        latitude.setText(String.valueOf(lat));
-        longitudeVal.setText(String.valueOf(longitude));
-
-        if(weatherOnce == false) {
-            String url = String.format("http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s,%s", lat, longitude);
-
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            TextView responseText = (TextView) findViewById(R.id.responseText);
-                            responseText.setText("Response is: " + response);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    TextView responseText = (TextView) findViewById(R.id.responseText);
-                    responseText.setText("That didn't work!");
-                }
-            });
-            // Add the request to the RequestQueue.
-            queue.add(stringRequest);
-            weatherOnce = !weatherOnce;
-        }
-        return temp;
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
     }
 
     @Override
@@ -153,26 +252,14 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_sensors_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    //Location Methods
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -180,6 +267,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         //TextView connectionStatus = (TextView) findViewById(R.id.connectStatus);
         //connectionStatus.setText("Connected");
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        updateLatLng(getLat(),getLong());
     }
 
     @Override
