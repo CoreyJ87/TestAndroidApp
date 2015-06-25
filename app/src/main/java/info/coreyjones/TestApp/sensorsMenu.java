@@ -35,6 +35,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +64,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         buildGoogleApiClient();
         restoreSensorText();
         createSensorListDialog();
+        parseJson();
     }
 
     @Override
@@ -103,6 +108,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
                         responseText.setText("Response is: " + response);
                         theRestoredresponse = response;
                         saveSensorText(view);
+                        parseJson();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -114,6 +120,28 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         queue.add(stringRequest);
     }
 
+
+    private void parseJson(){
+        if(!theRestoredresponse.equals(null)){
+            try {
+                String textOutput = "";
+                JSONObject reader = new JSONObject(theRestoredresponse);
+                JSONObject data = reader.getJSONObject("data");
+                JSONArray jsonArray = data.optJSONArray("current_condition");
+                //Iterate the jsonArray and print the info of JSONObjects
+                for(int i=0; i < jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String name = jsonObject.optString("temp_F");
+                    textOutput = name;
+                }
+                TextView output = (TextView) findViewById(R.id.temp);
+                output.setText(textOutput);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private double getLat() {
         if (!mCurrentLocation.equals(null)) {
