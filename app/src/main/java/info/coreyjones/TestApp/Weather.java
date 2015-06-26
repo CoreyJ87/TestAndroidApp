@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,13 +25,13 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 
 public class Weather extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private String theRestoredresponse;
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
 
@@ -40,7 +41,6 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
         setContentView(R.layout.activity_weather);
         buildGoogleApiClient();
         restoreSensorText();
-        parseJson();
     }
 
     @Override
@@ -85,9 +85,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     public void onResponse(String response) {
                         TextView responseText = (TextView) findViewById(R.id.responseText);
                         responseText.setText("Response is: " + response);
-                        theRestoredresponse = response;
-                        saveSensorText(view);
-                        parseJson();
+                        parseJson(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -100,22 +98,21 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     }
 
 
-    private void parseJson() {
-        if (!theRestoredresponse.equals(null)) {
+    private void parseJson(String theReponse) {
+        if (!theReponse.equals(null)) {
             try {
-                String textOutput = "";
-                JSONObject reader = new JSONObject(theRestoredresponse);
+                String weatherOutput = "";
+                JSONObject reader = new JSONObject(theReponse);
                 JSONObject data = reader.getJSONObject("data");
-                JSONArray jsonArray = data.optJSONArray("current_condition");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String temp = "Temp F: " + jsonObject.optString("temp_F");
-                    textOutput = temp;
+                JSONArray current_condition_array = data.optJSONArray("current_condition");
+                JSONObject current_condition_obj = current_condition_array.getJSONObject(0);
+                for(int i = 0; i<current_condition_obj.names().length(); i++){
+                    Log.v("Response", "key = " + current_condition_obj.names().getString(i) + " value = " + current_condition_obj.get(current_condition_obj.names().getString(i)));
+                    weatherOutput = String.format("%s\n  %s: %s",weatherOutput,current_condition_obj.names().getString(i),current_condition_obj.get(current_condition_obj.names().getString(i)));
                 }
-                TextView output = (TextView) findViewById(R.id.temp);
-                output.setText(textOutput);
-
+                TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
+                parsedTextView.setText(weatherOutput);
+                saveSensorText(getCurrentFocus());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -147,14 +144,18 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
 
     private void saveSensorText(View view) {
         //Grab text from editText field
-        TextView editText = (TextView) findViewById(R.id.responseText);
-        String message = editText.getText().toString();
+        TextView unparsedTextView = (TextView) findViewById(R.id.responseText);
+        TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
+        String unparsed = unparsedTextView.getText().toString();
+        String parsed = parsedTextView.getText().toString();
 
         //Save text to preferences
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("the_response", message);
+        editor.putString("unparsed_json", unparsed);
+        editor.putString("parsed_json", parsed);
         editor.putString("the_time", DateFormat.getTimeInstance().format(new Date()));
+
         editor.apply();
         toastMessage(getString(R.string.text_saved));
     }
@@ -162,14 +163,22 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     private void restoreSensorText() {
         String defaultResponseVal = getString(R.string.response_message_default);
         String defaultTimeVal = getString(R.string.default_time);
+        String defaultParsedJson = "Parsed Json Default";
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        theRestoredresponse = sharedPref.getString("the_response", defaultResponseVal);
+        String theRestoredresponse = sharedPref.getString("unparsed_json", defaultResponseVal);
         String theRestoredTime = sharedPref.getString("the_time", defaultTimeVal);
+        String theRestoredParsed = sharedPref.getString("parsed_json",defaultParsedJson);
+
         if (!theRestoredresponse.equals(defaultResponseVal)) {
             toastMessage(getString(R.string.textRestored));
         }
+
         TextView responseText = (TextView) findViewById(R.id.responseText);
         responseText.setText(theRestoredresponse);
+
+        TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
+        parsedTextView.setText(theRestoredParsed);
+
         TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
         lastUpdated.setText(theRestoredTime);
     }
