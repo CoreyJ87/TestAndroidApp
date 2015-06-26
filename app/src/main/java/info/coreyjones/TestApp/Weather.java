@@ -101,15 +101,52 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     private void parseJson(String theReponse) {
         if (!theReponse.equals(null)) {
             try {
-                String weatherOutput = "";
+                String weatherOutput = "Current Conditions:";
                 JSONObject reader = new JSONObject(theReponse);
                 JSONObject data = reader.getJSONObject("data");
+
+                //Top levels of the json
                 JSONArray current_condition_array = data.optJSONArray("current_condition");
+                JSONArray weather_array = data.optJSONArray("weather");
+
+                //Current Conditions. We dont loop the obj cus theres only one current condition
                 JSONObject current_condition_obj = current_condition_array.getJSONObject(0);
                 for(int i = 0; i<current_condition_obj.names().length(); i++){
                     Log.v("Response", "key = " + current_condition_obj.names().getString(i) + " value = " + current_condition_obj.get(current_condition_obj.names().getString(i)));
                     weatherOutput = String.format("%s\n  %s: %s",weatherOutput,current_condition_obj.names().getString(i),current_condition_obj.get(current_condition_obj.names().getString(i)));
                 }
+
+                //Weather by date. Loop later because it shows up to 5 days
+
+                for(int x=0;x< weather_array.length();x++){
+                    //Main Weather Obj
+                    JSONObject weather_obj = weather_array.getJSONObject(x);
+
+                    //Append the date of the current weather day
+                    String date = weather_obj.getString("date");
+                    weatherOutput = String.format("%s\n\n----Date: %s----",weatherOutput,date);
+
+                    //Astronomy
+                    JSONArray astronomy_array = weather_obj.getJSONArray("astronomy");
+                    JSONObject astronomy = astronomy_array.getJSONObject(0);
+                    for(int i = 0; i<astronomy.names().length(); i++){
+                        Log.v("Response", "key = " + astronomy.names().getString(i) + " value = " + astronomy.get(astronomy.names().getString(i)));
+                        weatherOutput = String.format("%s\n  %s: %s",weatherOutput,astronomy.names().getString(i),astronomy.get(astronomy.names().getString(i)));
+                    }
+
+                    //Hourly
+                    JSONArray hourly_obj_array = weather_obj.getJSONArray("hourly");
+                    for(int a = 0;a<hourly_obj_array.length();a++){
+                        JSONObject hourly_obj = hourly_obj_array.getJSONObject(a);
+                        String time = hourly_obj.getString("time");
+                        for(int i = 0; i<hourly_obj.names().length(); i++){
+                            Log.v("Response", "key = " + hourly_obj.names().getString(i) + " value = " + hourly_obj.get(hourly_obj.names().getString(i)));
+                            weatherOutput = String.format("%s\n%s: %s",weatherOutput,hourly_obj.names().getString(i),hourly_obj.get(hourly_obj.names().getString(i)));
+                        }
+                    }
+                }
+
+                //Output to textView
                 TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
                 parsedTextView.setText(weatherOutput);
                 saveSensorText(getCurrentFocus());

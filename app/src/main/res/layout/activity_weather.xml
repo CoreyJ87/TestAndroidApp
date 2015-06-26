@@ -9,7 +9,8 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="1">
 
         <TextView
             android:layout_width="wrap_content"
@@ -45,7 +46,7 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="310dp"
+            android:layout_height="244dp"
             android:id="@+id/scrollView" >
 
             <TextView
@@ -56,12 +57,19 @@
                 android:id="@+id/responseText" />
         </ScrollView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Parsed Data"
-            android:id="@+id/parsedData" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="172dp"
+            android:id="@+id/scrollView2"
+            android:layout_weight="0.86">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Parsed Data"
+                android:id="@+id/parsedData" />
+
+        </ScrollView>
 
     </LinearLayout>
 </RelativeLayout>
