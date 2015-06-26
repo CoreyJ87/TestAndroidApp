@@ -57,7 +57,10 @@ public class MainMenu extends ActionBarActivity {
             refreshPage(R.id.mapView);
         } else if (id == R.id.action_sensors) {
             initSensorsMenu();
-    }
+        }
+        else if(id == R.id.action_weather){
+            initWeatherMenu();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -163,9 +166,16 @@ public class MainMenu extends ActionBarActivity {
         Intent intent = new Intent(this, SettingsMenu.class);
         startActivity(intent);
     }
+
     //Settings Menu Initialization
     protected void initSensorsMenu() {
         Intent intent = new Intent(this, sensorsMenu.class);
+        startActivity(intent);
+    }
+
+    //Settings Menu Initialization
+    protected void initWeatherMenu() {
+        Intent intent = new Intent(this, Weather.class);
         startActivity(intent);
     }
 

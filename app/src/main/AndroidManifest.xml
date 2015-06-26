@@ -61,6 +61,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="info.coreyjones.TestApp.MainMenu" />
         </activity>
+        <activity
+            android:name=".Weather"
+            android:label="@string/title_activity_weather"
+            android:parentActivityName=".MainMenu" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="info.coreyjones.TestApp.MainMenu" />
+        </activity>
     </application>
 
 </manifest>

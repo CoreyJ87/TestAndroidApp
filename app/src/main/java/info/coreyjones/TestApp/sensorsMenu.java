@@ -41,13 +41,10 @@ import java.util.Date;
 import java.util.List;
 
 
-public class sensorsMenu extends ActionBarActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private GoogleApiClient mGoogleApiClient;
-    private Location mCurrentLocation;
+public class sensorsMenu extends ActionBarActivity implements SensorEventListener {
+
     private SensorManager mSensorManager;
     private Sensor mLight, mMagnetic, mBarometer;
-    private String theRestoredresponse;
-    private SensorManager smm;
     private List<Sensor> sensor;
     private ListView lv;
     final Context context = this;
@@ -58,10 +55,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensors_menu);
         setupSensors();
-        buildGoogleApiClient();
-        restoreSensorText();
         createSensorListDialog();
-        parseJson();
     }
 
     @Override
@@ -80,122 +74,7 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         return super.onOptionsItemSelected(item);
     }
 
-    public void getWeatherButton(View view) {
-        if (mCurrentLocation != null) {
-            TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
-            String updateTime = DateFormat.getTimeInstance().format(new Date());
-            lastUpdated.setText(updateTime);
-            getWeather(getCurrentFocus());
-        }
-    }
 
-    //My Methods
-    private void getWeather(final View view) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String apiKey = "a851d887d5e2d63218ba800ec5bb4";
-        double lat = getLat();
-        double longitude = getLong();
-        updateLatLng(lat,longitude);
-        String url = String.format("http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s,%s&key=%s&format=JSON", lat, longitude, apiKey);
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        TextView responseText = (TextView) findViewById(R.id.responseText);
-                        responseText.setText("Response is: " + response);
-                        theRestoredresponse = response;
-                        saveSensorText(view);
-                        parseJson();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                TextView responseText = (TextView) findViewById(R.id.responseText);
-                responseText.setText("That didn't work!");
-            }
-        });
-        queue.add(stringRequest);
-    }
-
-
-    private void parseJson(){
-        if(!theRestoredresponse.equals(null)){
-            try {
-                String textOutput = "";
-                JSONObject reader = new JSONObject(theRestoredresponse);
-                JSONObject data = reader.getJSONObject("data");
-                JSONArray jsonArray = data.optJSONArray("current_condition");
-                //Iterate the jsonArray and print the info of JSONObjects
-                for(int i=0; i < jsonArray.length(); i++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String name = jsonObject.optString("temp_F");
-                    textOutput = name;
-                }
-                TextView output = (TextView) findViewById(R.id.temp);
-                output.setText(textOutput);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private double getLat() {
-        if (!mCurrentLocation.equals(null)) {
-            double lat = mCurrentLocation.getLatitude();
-            return lat;
-        }
-        else {
-            double lat = 0;
-            return lat;
-        }
-    }
-
-    private double getLong() {
-        if (!mCurrentLocation.equals(null)) {
-            double longitude = mCurrentLocation.getLongitude();
-            return longitude;
-        } else {
-            double longitude = 0;
-            return longitude;
-        }
-    }
-
-    private void updateLatLng(double lat, double longitude) {
-        TextView latitude = (TextView) findViewById(R.id.lat);
-        TextView longitudeVal = (TextView) findViewById(R.id.longitude);
-        latitude.setText(String.valueOf(lat));
-        longitudeVal.setText(String.valueOf(longitude));
-    }
-
-    private void saveSensorText(View view) {
-        //Grab text from editText field
-        TextView editText = (TextView) findViewById(R.id.responseText);
-        String message = editText.getText().toString();
-
-        //Save text to preferences
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("the_response", message);
-        editor.putString("the_time", DateFormat.getTimeInstance().format(new Date()));
-        editor.apply();
-        toastMessage(getString(R.string.text_saved));
-    }
-
-    private void restoreSensorText() {
-        String defaultResponseVal = getString(R.string.response_message_default);
-        String defaultTimeVal = getString(R.string.default_time);
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        theRestoredresponse = sharedPref.getString("the_response", defaultResponseVal);
-        String theRestoredTime = sharedPref.getString("the_time", defaultTimeVal);
-        if (!theRestoredresponse.equals(defaultResponseVal)) {
-            toastMessage(getString(R.string.textRestored));
-        }
-        TextView responseText = (TextView) findViewById(R.id.responseText);
-        responseText.setText(theRestoredresponse);
-        TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
-        lastUpdated.setText(theRestoredTime);
-    }
 
     private void createSensorListDialog() {
         final Dialog optionDialog = new Dialog(context);
@@ -227,12 +106,6 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mBarometer = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
     }
-
-    private void toastMessage(CharSequence text) {
-        Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
 
     //Sensor Methods
     @Override
@@ -275,36 +148,4 @@ public class sensorsMenu extends ActionBarActivity implements SensorEventListene
         super.onPause();
         mSensorManager.unregisterListener(this);
     }
-
-
-    //Location Methods
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        //TextView connectionStatus = (TextView) findViewById(R.id.connectStatus);
-        //connectionStatus.setText("Connected");
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        updateLatLng(getLat(),getLong());
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        //TextView connectStatus = (TextView) findViewById(R.id.connectStatus);
-        //connectStatus.setText("Suspended Connection");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        //TextView connectStatus = (TextView) findViewById(R.id.connectStatus);
-        //connectStatus.setText("Connect to lat/long Failed");
-    }
-
 }

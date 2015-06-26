@@ -43,61 +43,12 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
-            android:id="@+id/lat" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
-            android:id="@+id/longitude" />
-
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="List Sensors"
             android:id="@+id/listSensors" />
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Refresh Weather"
-            android:id="@+id/refreshWeather"
-            android:onClick="getWeatherButton" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/default_time"
-            android:id="@+id/lastUpdated" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="310dp"
-            android:id="@+id/scrollView" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="@string/response_message_default"
-                android:id="@+id/responseText" />
-        </ScrollView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
-            android:id="@+id/temp" />
 
     </LinearLayout>
 </RelativeLayout>
