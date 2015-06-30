@@ -46,7 +46,7 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="244dp"
+            android:layout_height="167dp"
             android:id="@+id/scrollView" >
 
             <TextView
@@ -59,9 +59,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="172dp"
-            android:id="@+id/scrollView2"
-            android:layout_weight="0.86">
+            android:layout_height="match_parent"
+            android:id="@+id/scrollView2">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

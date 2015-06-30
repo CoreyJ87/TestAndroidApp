@@ -98,11 +98,11 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     }
 
 
-    private void parseJson(String theReponse) {
-        if (!theReponse.equals(null)) {
+    private void parseJson(String theResponse) {
+        if (!theResponse.equals(null)) {
             try {
                 String weatherOutput = "Current Conditions:";
-                JSONObject reader = new JSONObject(theReponse);
+                JSONObject reader = new JSONObject(theResponse);
                 JSONObject data = reader.getJSONObject("data");
 
                 //Top levels of the json
@@ -117,14 +117,18 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                 }
 
                 //Weather by date. Loop later because it shows up to 5 days
-
                 for(int x=0;x< weather_array.length();x++){
                     //Main Weather Obj
                     JSONObject weather_obj = weather_array.getJSONObject(x);
 
                     //Append the date of the current weather day
                     String date = weather_obj.getString("date");
-                    weatherOutput = String.format("%s\n\n----Date: %s----",weatherOutput,date);
+                    String maxTempF = weather_obj.getString("maxtempF");
+                    String minTemp = weather_obj.getString("mintempF");
+                    String uvIndex = weather_obj.getString("uvIndex");
+
+                    weatherOutput = String.format("%s\nMaxTemp: %s\nMinTemp: %s\nuvIndex: %s\n",weatherOutput,maxTempF,minTemp,uvIndex);
+                    weatherOutput = String.format("%s\n\n----Date: %s----", weatherOutput, date);
 
                     //Astronomy
                     JSONArray astronomy_array = weather_obj.getJSONArray("astronomy");
@@ -139,6 +143,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     for(int a = 0;a<hourly_obj_array.length();a++){
                         JSONObject hourly_obj = hourly_obj_array.getJSONObject(a);
                         String time = hourly_obj.getString("time");
+                        weatherOutput = String.format("%s\n\n Time: %s",weatherOutput, time);
                         for(int i = 0; i<hourly_obj.names().length(); i++){
                             Log.v("Response", "key = " + hourly_obj.names().getString(i) + " value = " + hourly_obj.get(hourly_obj.names().getString(i)));
                             weatherOutput = String.format("%s\n%s: %s",weatherOutput,hourly_obj.names().getString(i),hourly_obj.get(hourly_obj.names().getString(i)));
