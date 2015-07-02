@@ -104,7 +104,8 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                 String weatherOutput = "Current Conditions:";
                 JSONObject reader = new JSONObject(theResponse);
                 JSONObject data = reader.getJSONObject("data");
-
+                TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
+                parsedTextView.setText(weatherOutput);
                 //Top levels of the json
                 JSONArray current_condition_array = data.optJSONArray("current_condition");
                 JSONArray weather_array = data.optJSONArray("weather");
@@ -113,9 +114,19 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                 JSONObject current_condition_obj = current_condition_array.getJSONObject(0);
                 for(int i = 0; i<current_condition_obj.names().length(); i++){
                     Log.v("Response", "key = " + current_condition_obj.names().getString(i) + " value = " + current_condition_obj.get(current_condition_obj.names().getString(i)));
-                    weatherOutput = String.format("%s\n  %s: %s",weatherOutput,current_condition_obj.names().getString(i),current_condition_obj.get(current_condition_obj.names().getString(i)));
+                    if(current_condition_obj.names().getString(i) == "weatherDesc") {
+                        JSONArray weatherDescArr = current_condition_obj.optJSONArray("weatherDesc");
+                        JSONObject weatherDescobj = weatherDescArr.getJSONObject(0);
+                        parsedTextView.append(String.format("\nWeather Description: %s",weatherDescobj.getString("value")));
+                    }
+                    parsedTextView.append(String.format("\n%s: %s", current_condition_obj.names().getString(i), current_condition_obj.get(current_condition_obj.names().getString(i))));
                 }
 
+                //Output to textView
+
+
+                saveSensorText(getCurrentFocus());
+                /*
                 //Weather by date. Loop later because it shows up to 5 days
                 for(int x=0;x< weather_array.length();x++){
                     //Main Weather Obj
@@ -149,12 +160,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                             weatherOutput = String.format("%s\n%s: %s",weatherOutput,hourly_obj.names().getString(i),hourly_obj.get(hourly_obj.names().getString(i)));
                         }
                     }
-                }
-
-                //Output to textView
-                TextView parsedTextView = (TextView) findViewById(R.id.parsedData);
-                parsedTextView.setText(weatherOutput);
-                saveSensorText(getCurrentFocus());
+                }*/
             } catch (JSONException e) {
                 e.printStackTrace();
             }
