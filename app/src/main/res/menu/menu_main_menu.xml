@@ -18,10 +18,15 @@
         android:title="@string/action_sensors"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_weather"
+        android:id="@+id/action_butter"
         android:orderInCategory="100"
-        android:title="@string/action_weather"
+        android:title="@string/action_butter"
         app:showAsAction="never" />
+    <item
+    android:id="@+id/action_weather"
+    android:orderInCategory="100"
+    android:title="@string/action_weather"
+    app:showAsAction="never" />
     <item
         android:id="@+id/action_immersive"
         android:orderInCategory="100"

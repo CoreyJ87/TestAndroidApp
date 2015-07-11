@@ -18,6 +18,7 @@
     <string name="action_sensors">Sensors Example</string>
     <string name="action_weather">Weather</string>
     <string name="action_immersive">Toggle Full Screen Mode</string>
+    <string name="action_butter">Butter Test</string>
 
     <!--Toast Text-->
     <string name="fullScreenOff">Full Screen mode: OFF!</string>
@@ -59,4 +60,6 @@
     <string name="default_time">Last Updated</string>
     <string name="title_activity_weather">Weather</string>
     <string name="title_activity_data_binding">DataBinding</string>
+    <string name="title_activity_butter">ButterActivity</string>
+
 </resources>

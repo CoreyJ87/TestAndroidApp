@@ -61,6 +61,9 @@ public class MainMenu extends ActionBarActivity {
         else if(id == R.id.action_weather){
             initWeatherMenu();
         }
+        else if(id == R.id.action_butter){
+            initButterMenu();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -178,6 +181,12 @@ public class MainMenu extends ActionBarActivity {
         Intent intent = new Intent(this, Weather.class);
         startActivity(intent);
     }
+    //Settings Menu Initialization
+    protected void initButterMenu() {
+        Intent intent = new Intent(this, ButterActivity.class);
+        startActivity(intent);
+    }
+
 
     //Toast Message Wrapper for easier use.
     protected void toastMessage(CharSequence text) {
