@@ -4,16 +4,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -22,7 +20,8 @@ import butterknife.OnItemClick;
 import butterknife.OnLongClick;
 
 public class ButterActivity extends AppCompatActivity {
-    private List<Map<String, Object>> data;
+    ArrayList<String> data = new ArrayList<>();
+    ArrayAdapter<String> adapter;
 
     private static final ButterKnife.Action<View> ALPHA_FADE = new ButterKnife.Action<View>() {
         @Override public void apply(View view, int index) {
@@ -39,12 +38,8 @@ public class ButterActivity extends AppCompatActivity {
     @Bind(R.id.hello) Button hello;
     @Bind(R.id.list_of_things) ListView listOfThings;
     @Bind(R.id.footer) TextView footer;
+    @Bind({ R.id.thetitle, R.id.thesubtitle, R.id.hello }) List<View> headerViews;
 
-    @Bind({ R.id.thetitle, R.id.thesubtitle, R.id.hello })
-    List<View> headerViews;
-
-
-    private SimpleAdapter adapter;
 
     @OnClick(R.id.hello) void sayHello() {
         Toast.makeText(this, "Hello, views!",Toast.LENGTH_SHORT).show();
@@ -63,32 +58,18 @@ public class ButterActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_butter);
+        for(int x = 0;x<10;x++) {
+            data.add(x,String.format("Item %s",x));
+        }
         ButterKnife.bind(this);
-        PrepareData();
+
         // Contrived code to use the bound fields.
         title.setText("Butter Knife");
         subtitle.setText("Field and method binding for Android views.");
-        footer.setText("by Jake Wharton");
+        footer.setText("by Corey");
         hello.setText("Say Hello");
 
-        adapter = new SimpleAdapter(this, data,android.R.layout.simple_list_item_1, new String[] { "AAA" },
-                new int[] { android.R.id.text1 });
+        adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,data);
         listOfThings.setAdapter(adapter);
-    }
-    private void PrepareData() {
-        data = new ArrayList<>();
-        Map<String, Object> item;
-        item = new HashMap<>();
-        item.put("1", "A");
-        item.put("2", "B");
-        data.add(item);
-        item = new HashMap<>();
-        item.put("3", "C");
-        item.put("4", "D");
-        data.add(item);
-        item = new HashMap<>();
-        item.put("5", "E");
-        item.put("6", "F");
-        data.add(item);
     }
 }
