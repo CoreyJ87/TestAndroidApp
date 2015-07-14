@@ -40,12 +40,18 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     private Location mCurrentLocation;
     final String apiKey = "a851d887d5e2d63218ba800ec5bb4";
     final String apiUrl = "http://api.worldweatheronline.com/free/v2/weather.ashx";
-    @Bind(R.id.responseText) TextView responseText;
-    @Bind(R.id.parsedData) TextView parsedTextView;
-    @Bind(R.id.longitude) TextView longitudeVal;
-    @Bind(R.id.lat) TextView latitude;
-    @Bind(R.id.lastUpdated) TextView lastUpdated;
-    @Bind(R.id.connectionStatus) TextView connectionStatus;
+    @Bind(R.id.responseText)
+    TextView responseText;
+    @Bind(R.id.parsedData)
+    TextView parsedTextView;
+    @Bind(R.id.longitude)
+    TextView longitudeVal;
+    @Bind(R.id.lat)
+    TextView latitude;
+    @Bind(R.id.lastUpdated)
+    TextView lastUpdated;
+    @Bind(R.id.connectionStatus)
+    TextView connectionStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +68,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
         getMenuInflater().inflate(R.menu.menu_weather, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -71,21 +78,21 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
 
         return super.onOptionsItemSelected(item);
     }
-    
-    @OnClick(R.id.refreshWeather) void refreshWeatherButton(Button button) {
+
+    @OnClick(R.id.refreshWeather)
+    void refreshWeatherButton(Button button) {
         String updateTime = DateFormat.getTimeInstance().format(new Date());
         lastUpdated.setText(updateTime);
         getWeather();
     }
 
     private void getWeather() {
-        RequestQueue queue = Volley.newRequestQueue(this);
         double lat = getLat();
         double longitude = getLong();
-        String url = String.format("%s?q=%s,%s&key=%s&format=JSON", apiUrl, lat, longitude, apiKey);
-
-
         updateLatLng(lat, longitude);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = String.format("%s?q=%s,%s&key=%s&format=JSON", apiUrl, lat, longitude, apiKey);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -120,12 +127,17 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                 JSONObject current_condition_obj = current_condition_array.getJSONObject(0);
                 for (int i = 0; i < current_condition_obj.names().length(); i++) {
                     Log.v("Response", "key = " + current_condition_obj.names().getString(i) + " value = " + current_condition_obj.get(current_condition_obj.names().getString(i)));
-                    if (current_condition_obj.names().getString(i) == "weatherDesc") {
+                    if (current_condition_obj.names().getString(i).equalsIgnoreCase("weatherDesc")) {
                         JSONArray weatherDescArr = current_condition_obj.optJSONArray("weatherDesc");
-                        JSONObject weatherDescobj = weatherDescArr.getJSONObject(0);
-                        parsedTextView.append(String.format("\nWeather Description: %s", weatherDescobj.getString("value")));
+                        JSONObject weatherDescObj = weatherDescArr.getJSONObject(0);
+                        parsedTextView.append(String.format("\nWeather Description: %s", weatherDescObj.getString("value")));
+                    } else if (current_condition_obj.names().getString(i).equalsIgnoreCase("weatherIconUrl")) {
+                        JSONArray weatherIconArr = current_condition_obj.optJSONArray("weatherIconUrl");
+                        JSONObject weatherIconObj = weatherIconArr.getJSONObject(0);
+                        parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
+                    } else {
+                        parsedTextView.append(String.format("\n%s: %s", current_condition_obj.names().getString(i), current_condition_obj.get(current_condition_obj.names().getString(i))));
                     }
-                    parsedTextView.append(String.format("\n%s: %s", current_condition_obj.names().getString(i), current_condition_obj.get(current_condition_obj.names().getString(i))));
                 }
 
                 //Output to textView
