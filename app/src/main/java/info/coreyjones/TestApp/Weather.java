@@ -71,16 +71,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
 
         return super.onOptionsItemSelected(item);
     }
-
-    //My Methods
-    public void getWeatherButton(View view) {
-        if (mCurrentLocation != null) {
-            //TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
-            String updateTime = DateFormat.getTimeInstance().format(new Date());
-            lastUpdated.setText(updateTime);
-            getWeather();
-        }
-    }
+    
     @OnClick(R.id.refreshWeather) void refreshWeatherButton(Button button) {
         String updateTime = DateFormat.getTimeInstance().format(new Date());
         lastUpdated.setText(updateTime);
