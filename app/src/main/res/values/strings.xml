@@ -61,5 +61,9 @@
     <string name="title_activity_weather">Weather</string>
     <string name="title_activity_data_binding">DataBinding</string>
     <string name="title_activity_butter">ButterActivity</string>
+    <string name="connectionStatus">connectionStatus</string>
+    <string name="longitudeDefaultText">Longitude</string>
+    <string name="latitudeDefaultText">Latitude</string>
+    <string name="RefreshWeatherButton">Refresh Weather</string>
 
 </resources>

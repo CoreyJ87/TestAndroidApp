@@ -16,26 +16,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Latitude"
+            android:text="@string/latitudeDefaultText"
             android:id="@+id/lat" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Longitude"
+            android:text="@string/longitudeDefaultText"
             android:id="@+id/longitude" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/connectionStatus"
+            android:id="@+id/connectionStatus" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Refresh Weather"
-            android:id="@+id/refreshWeather"
-            android:onClick="getWeatherButton"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:text="@string/RefreshWeatherButton"
+            android:id="@+id/refreshWeather" />
 
         <TextView
             android:layout_width="wrap_content"
