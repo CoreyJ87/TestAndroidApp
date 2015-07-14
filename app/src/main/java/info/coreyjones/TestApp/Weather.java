@@ -2,14 +2,23 @@ package info.coreyjones.TestApp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +31,9 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,14 +46,12 @@ import butterknife.OnClick;
 import java.text.DateFormat;
 import java.util.Date;
 
-
 public class Weather extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
     final String apiKey = "a851d887d5e2d63218ba800ec5bb4";
     final String apiUrl = "http://api.worldweatheronline.com/free/v2/weather.ashx";
-    @Bind(R.id.responseText)
-    TextView responseText;
+    ImageLoader imageLoader = ImageLoader.getInstance();
     @Bind(R.id.parsedData)
     TextView parsedTextView;
     @Bind(R.id.longitude)
@@ -60,7 +70,8 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
         ButterKnife.bind(this);
         buildGoogleApiClient();
         restoreSensorText();
-
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+        ImageLoader.getInstance().init(config);
     }
 
     @Override
@@ -98,13 +109,13 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        responseText.setText("Response is: " + response);
+                        //responseText.setText("Response is: " + response);
                         parseJson(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                responseText.setText("That didn't work!");
+                //responseText.setText("That didn't work!");
             }
         });
         queue.add(stringRequest);
@@ -134,7 +145,15 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     } else if (current_condition_obj.names().getString(i).equalsIgnoreCase("weatherIconUrl")) {
                         JSONArray weatherIconArr = current_condition_obj.optJSONArray("weatherIconUrl");
                         JSONObject weatherIconObj = weatherIconArr.getJSONObject(0);
-                        parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
+                        //parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
+                        imageLoader.loadImage(weatherIconObj.getString("value"), new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                SpannableStringBuilder ssb = new SpannableStringBuilder( "\nCurrent weather condition: " );
+                                ssb.setSpan( new ImageSpan(getApplicationContext(),loadedImage, DynamicDrawableSpan.ALIGN_BASELINE ), 27, 28, Spannable.SPAN_INCLUSIVE_INCLUSIVE );
+                                parsedTextView.append(ssb);
+                            }
+                        });
                     } else {
                         parsedTextView.append(String.format("\n%s: %s", current_condition_obj.names().getString(i), current_condition_obj.get(current_condition_obj.names().getString(i))));
                     }
@@ -205,13 +224,13 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     }
 
     private void saveSensorText() {
-        String unparsed = responseText.getText().toString();
+        //String unparsed = responseText.getText().toString();
         String parsed = parsedTextView.getText().toString();
 
         //Save text to preferences
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("unparsed_json", unparsed);
+        //editor.putString("unparsed_json", unparsed);
         editor.putString("parsed_json", parsed);
         editor.putString("the_time", DateFormat.getTimeInstance().format(new Date()));
 
@@ -231,7 +250,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
         if (!theRestoredresponse.equals(defaultResponseVal)) {
             toastMessage(getString(R.string.textRestored));
         }
-        responseText.setText(theRestoredresponse);
+        //responseText.setText(theRestoredresponse);
         parsedTextView.setText(theRestoredParsed);
         lastUpdated.setText(theRestoredTime);
     }
