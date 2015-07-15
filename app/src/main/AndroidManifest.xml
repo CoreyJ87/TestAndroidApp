@@ -70,14 +70,6 @@
                 android:value="info.coreyjones.TestApp.MainMenu" />
         </activity>
         <activity
-            android:name=".DataBinding"
-            android:label="@string/title_activity_data_binding"
-            android:parentActivityName=".MainMenu" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="info.coreyjones.TestApp.MainMenu" />
-        </activity>
-        <activity
             android:name=".ButterActivity"
             android:label="@string/title_activity_butter"
             android:parentActivityName=".MainMenu" >
