@@ -142,7 +142,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     } else if (current_condition_obj.names().getString(i).equalsIgnoreCase("weatherIconUrl")) {
                         JSONArray weatherIconArr = current_condition_obj.optJSONArray("weatherIconUrl");
                         JSONObject weatherIconObj = weatherIconArr.getJSONObject(0);
-                        //parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
+                        parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
                         imageLoader.loadImage(weatherIconObj.getString("value"), new SimpleImageLoadingListener() {
                             @Override
                             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
@@ -156,8 +156,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     }
                 }
 
-                saveSensorText();
-                /*
+
                 //Weather by date. Loop later because it shows up to 5 days
                 for(int x=0;x< weather_array.length();x++){
                     //Main Weather Obj
@@ -169,15 +168,15 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     String minTemp = weather_obj.getString("mintempF");
                     String uvIndex = weather_obj.getString("uvIndex");
 
-                    weatherOutput = String.format("%s\nMaxTemp: %s\nMinTemp: %s\nuvIndex: %s\n",weatherOutput,maxTempF,minTemp,uvIndex);
-                    weatherOutput = String.format("%s\n\n----Date: %s----", weatherOutput, date);
+                    parsedTextView.append(String.format("\nMaxTemp: %s\nMinTemp: %s\nuvIndex: %s\n",maxTempF, minTemp, uvIndex));
+                    parsedTextView.append(String.format("\n\n----Date: %s----", date));
 
                     //Astronomy
                     JSONArray astronomy_array = weather_obj.getJSONArray("astronomy");
                     JSONObject astronomy = astronomy_array.getJSONObject(0);
                     for(int i = 0; i<astronomy.names().length(); i++){
                         Log.v("Response", "key = " + astronomy.names().getString(i) + " value = " + astronomy.get(astronomy.names().getString(i)));
-                        weatherOutput = String.format("%s\n  %s: %s",weatherOutput,astronomy.names().getString(i),astronomy.get(astronomy.names().getString(i)));
+                        parsedTextView.append(String.format("\n  %s: %s", astronomy.names().getString(i), astronomy.get(astronomy.names().getString(i))));
                     }
 
                     //Hourly
@@ -185,13 +184,32 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
                     for(int a = 0;a<hourly_obj_array.length();a++){
                         JSONObject hourly_obj = hourly_obj_array.getJSONObject(a);
                         String time = hourly_obj.getString("time");
-                        weatherOutput = String.format("%s\n\n Time: %s",weatherOutput, time);
+                        parsedTextView.append(String.format("\n\n Time: %s",time));
                         for(int i = 0; i<hourly_obj.names().length(); i++){
                             Log.v("Response", "key = " + hourly_obj.names().getString(i) + " value = " + hourly_obj.get(hourly_obj.names().getString(i)));
-                            weatherOutput = String.format("%s\n%s: %s",weatherOutput,hourly_obj.names().getString(i),hourly_obj.get(hourly_obj.names().getString(i)));
+                            if (hourly_obj.names().getString(i).equalsIgnoreCase("weatherDesc")) {
+                                JSONArray weatherDescArr = hourly_obj.optJSONArray("weatherDesc");
+                                JSONObject weatherDescObj = weatherDescArr.getJSONObject(0);
+                                parsedTextView.append(String.format("\nWeather Description: %s", weatherDescObj.getString("value")));
+                            } else if (hourly_obj.names().getString(i).equalsIgnoreCase("weatherIconUrl")) {
+                                JSONArray weatherIconArr = current_condition_obj.optJSONArray("weatherIconUrl");
+                                JSONObject weatherIconObj = weatherIconArr.getJSONObject(0);
+                                parsedTextView.append(String.format("\nWeather Icon URL: %s", weatherIconObj.getString("value")));
+                                imageLoader.loadImage(weatherIconObj.getString("value"), new SimpleImageLoadingListener() {
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        SpannableStringBuilder ssb = new SpannableStringBuilder("\nCurrent weather condition: ");
+                                        ssb.setSpan(new ImageSpan(getApplicationContext(), loadedImage, DynamicDrawableSpan.ALIGN_BASELINE), 27, 28, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                                        parsedTextView.append(ssb);
+                                    }
+                                });
+                            } else {
+                                parsedTextView.append(String.format("\n%s: %s", hourly_obj.names().getString(i), hourly_obj.get(hourly_obj.names().getString(i))));
+                            }
                         }
                     }
-                }*/
+                }
+                saveSensorText();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
