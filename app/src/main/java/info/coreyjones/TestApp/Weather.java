@@ -49,8 +49,6 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     private String responseText = "";
     final String apiKey = "a851d887d5e2d63218ba800ec5bb4";
     final String apiUrl = "http://api.worldweatheronline.com/free/v2/weather.ashx";
-    SharedPreferences sharedPref = getPreferences(getApplicationContext().MODE_PRIVATE);
-    SharedPreferences.Editor editor = sharedPref.edit();
     ImageLoader imageLoader = ImageLoader.getInstance();
 
     //View Bindings
@@ -108,6 +106,8 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
      void clearAll(Button button){
         String defaultResponseVal = getString(R.string.response_message_default);
         String defaultTimeVal = getString(R.string.default_time);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("unparsed_json", defaultResponseVal);
         editor.putString("the_time", defaultTimeVal);
         parsedTextView.setText("");
@@ -260,6 +260,8 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
 
     private void saveSensorText(boolean showToast) {
         //Save text to preferences
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("unparsed_json", responseText);
         editor.putString("the_time", DateFormat.getTimeInstance().format(new Date()));
         editor.apply();
@@ -271,6 +273,7 @@ public class Weather extends ActionBarActivity implements GoogleApiClient.Connec
     private void restoreSensorText(boolean showToast) {
         String defaultResponseVal = getString(R.string.response_message_default);
         String defaultTimeVal = getString(R.string.default_time);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         String theRestoredresponse = sharedPref.getString("unparsed_json", defaultResponseVal);
         String theRestoredTime = sharedPref.getString("the_time", defaultTimeVal);
         Log.v("Restored Response", theRestoredresponse);
